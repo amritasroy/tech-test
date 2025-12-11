@@ -91,13 +91,17 @@ class CommitAnalyzer:
             for diff in diffs:
                 # Count lines added and deleted
                 if diff.diff:
-                    diff_text = diff.diff.decode('utf-8', errors='ignore')
-                    lines = diff_text.split('\n')
-                    for line in lines:
-                        if line.startswith('+') and not line.startswith('+++'):
-                            stats['lines_added'] += 1
-                        elif line.startswith('-') and not line.startswith('---'):
-                            stats['lines_deleted'] += 1
+                    try:
+                        diff_text = diff.diff.decode('utf-8', errors='ignore')
+                        lines = diff_text.split('\n')
+                        for line in lines:
+                            if line.startswith('+') and not line.startswith('+++'):
+                                stats['lines_added'] += 1
+                            elif line.startswith('-') and not line.startswith('---'):
+                                stats['lines_deleted'] += 1
+                    except (UnicodeDecodeError, AttributeError) as e:
+                        # Skip diffs that can't be decoded
+                        pass
                 
                 # Calculate complexity based on file types and change patterns
                 if diff.a_path:
@@ -107,13 +111,14 @@ class CommitAnalyzer:
                         stats['complexity_score'] += 2
                     elif any(ext in path for ext in ['.json', '.xml', '.yaml', '.yml']):
                         stats['complexity_score'] += 1
-                    
-                    # Higher complexity for smaller focused changes (likely bug fixes)
-                    if 1 <= stats['files_modified'] <= 3:
-                        stats['complexity_score'] += 1
+            
+            # Higher complexity for smaller focused changes (likely bug fixes)
+            # Check this after all diffs are processed
+            if 1 <= stats['files_modified'] <= 3:
+                stats['complexity_score'] += 1
         
-        except Exception as e:
-            # Some commits might have issues with diff calculation
+        except (ValueError, TypeError, AttributeError) as e:
+            # Handle specific exceptions that might occur during diff analysis
             pass
         
         return stats

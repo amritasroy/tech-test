@@ -32,8 +32,10 @@ def analyze(repo_path, format, sort_by, months):
         git-tracker /path/to/repo --months 0  # Analyze all commits
     """
     if months == 0:
+        time_period_text = "(All Commits)"
         click.echo(f"\n🔍 Analyzing repository (all commits): {os.path.abspath(repo_path)}\n")
     else:
+        time_period_text = f"(Last {months} Month{'s' if months > 1 else ''})"
         click.echo(f"\n🔍 Analyzing repository (last {months} month{'s' if months > 1 else ''}): {os.path.abspath(repo_path)}\n")
     
     try:
@@ -61,12 +63,12 @@ def analyze(repo_path, format, sort_by, months):
         )
         
         if format == 'table':
-            display_table(sorted_results)
+            display_table(sorted_results, time_period_text)
         else:
-            display_detailed(sorted_results)
+            display_detailed(sorted_results, time_period_text)
         
         # Display summary
-        display_summary(results)
+        display_summary(results, time_period_text)
         
     except ValueError as e:
         click.echo(f"❌ Error: {str(e)}", err=True)
@@ -76,7 +78,7 @@ def analyze(repo_path, format, sort_by, months):
         raise click.Abort()
 
 
-def display_table(results):
+def display_table(results, time_period_text):
     """Display results in a compact table format."""
     headers = [
         'Author', 
@@ -104,13 +106,13 @@ def display_table(results):
             stats['work_style']
         ])
     
-    click.echo("📊 Contributors (Last Month):\n")
+    click.echo(f"📊 Contributors {time_period_text}:\n")
     click.echo(tabulate(rows, headers=headers, tablefmt='grid'))
 
 
-def display_detailed(results):
+def display_detailed(results, time_period_text):
     """Display results in detailed format."""
-    click.echo("👥 Contributors (Last Month) - Detailed View:\n")
+    click.echo(f"👥 Contributors {time_period_text} - Detailed View:\n")
     
     for i, (author, stats) in enumerate(results, 1):
         click.echo(f"{'='*80}")
@@ -132,7 +134,7 @@ def display_detailed(results):
         click.echo()
 
 
-def display_summary(results):
+def display_summary(results, time_period_text):
     """Display overall repository summary."""
     total_commits = sum(stats['commit_count'] for stats in results.values())
     total_lines_added = sum(stats['lines_added'] for stats in results.values())
@@ -144,7 +146,7 @@ def display_summary(results):
     avg_value = sum(stats['value_score'] for stats in results.values()) / len(results)
     
     click.echo(f"\n{'='*80}")
-    click.echo("📋 OVERALL SUMMARY (Last Month)")
+    click.echo(f"📋 OVERALL SUMMARY {time_period_text}")
     click.echo(f"{'='*80}")
     click.echo(f"  Total Contributors: {len(results)}")
     click.echo(f"  Total Commits: {total_commits}")

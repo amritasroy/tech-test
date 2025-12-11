@@ -41,7 +41,8 @@ class CommitAnalyzer:
         
         # Initialize LLM analyzer for semantic code analysis
         # use_llm=True enables full transformer model support
-        self.llm_analyzer = LLMCodeAnalyzer(use_llm=True)
+        # Using mistral-7b-instruct for enhanced code understanding
+        self.llm_analyzer = LLMCodeAnalyzer(use_llm=True, model_name="mistralai/Mistral-7B-Instruct-v0.2")
     
     def get_commits_last_month(self, months: int = 1) -> List:
         """

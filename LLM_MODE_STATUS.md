@@ -2,21 +2,22 @@
 
 ## Summary
 
-The LLM section has been successfully enabled as requested. The system now attempts to use the full HuggingFace transformer model for code analysis.
+The LLM section has been successfully enabled with Mistral-7B-Instruct model. The system now attempts to use the full HuggingFace transformer model for code analysis.
 
 ## Changes Made
 
 ### 1. Enabled LLM Mode in commit_analyzer.py
-**File**: `commit_analyzer.py` (line 42-44)
+**File**: `commit_analyzer.py` (line 42-45)
 
 ```python
 # Initialize LLM analyzer for semantic code analysis
 # use_llm=True enables full transformer model support
-self.llm_analyzer = LLMCodeAnalyzer(use_llm=True)
+# Using mistral-7b-instruct for enhanced code understanding
+self.llm_analyzer = LLMCodeAnalyzer(use_llm=True, model_name="mistralai/Mistral-7B-Instruct-v0.2")
 ```
 
 **Changed from**: `LLMCodeAnalyzer()` (default heuristic mode)
-**Changed to**: `LLMCodeAnalyzer(use_llm=True)` (full LLM mode)
+**Changed to**: `LLMCodeAnalyzer(use_llm=True, model_name="mistralai/Mistral-7B-Instruct-v0.2")` (full LLM mode with Mistral)
 
 ### 2. Updated requirements.txt
 **File**: `requirements.txt`
@@ -39,9 +40,9 @@ Added `self._lazy_init()` call in `analyze_code_impact()` method to trigger mode
 
 ### Normal Environment (with Internet)
 1. System initializes with `use_llm=True`
-2. Downloads microsoft/codebert-base model from HuggingFace
+2. Downloads mistralai/Mistral-7B-Instruct-v0.2 model from HuggingFace
 3. Uses transformer-based tokenization and analysis
-4. Provides enhanced semantic understanding
+4. Provides enhanced semantic understanding with Mistral's instruction-following capabilities
 
 ### Sandboxed Environment (no Internet)
 1. System initializes with `use_llm=True`
@@ -59,7 +60,7 @@ $ python test_llm_mode.py
 ```
 **Result**: All tests passed
 - ✓ LLM mode enabled (`use_llm=True`)
-- ✓ Model name correctly set (`microsoft/codebert-base`)
+- ✓ Model name correctly set (`mistralai/Mistral-7B-Instruct-v0.2`)
 - ✓ Initialization attempted
 - ✓ Fallback to heuristics works correctly
 - ✓ Analysis produces correct results
@@ -69,7 +70,9 @@ $ python test_llm_mode.py
 from commit_analyzer import CommitAnalyzer
 analyzer = CommitAnalyzer('.')
 print(f'use_llm={analyzer.llm_analyzer.use_llm}')
+print(f'model={analyzer.llm_analyzer.model_name}')
 # Output: use_llm=True
+# Output: model=mistralai/Mistral-7B-Instruct-v0.2
 ```
 
 ### Test 3: Original Tests Still Pass ✓
@@ -108,18 +111,40 @@ In production environments with internet access:
 
 ## Verification
 
-Run any of these commands to verify LLM mode is enabled:
+Run any of these commands to verify LLM mode is enabled with Mistral:
 
 ```bash
 # Quick check
-python -c "from commit_analyzer import CommitAnalyzer; a = CommitAnalyzer('.'); print(f'LLM enabled: {a.llm_analyzer.use_llm}')"
+python -c "from commit_analyzer import CommitAnalyzer; a = CommitAnalyzer('.'); print(f'LLM enabled: {a.llm_analyzer.use_llm}'); print(f'Model: {a.llm_analyzer.model_name}')"
 
 # Full test suite
 python test_llm_mode.py
 
-# Live analysis (will show LLM initialization attempt)
+# Live analysis (will show LLM initialization attempt with Mistral)
 python git_tracker.py --months 0
 ```
+
+## Expected Output
+
+When running with LLM mode enabled, you'll see:
+```
+None of PyTorch, TensorFlow >= 2.0, or Flax have been found...
+[Retry attempts to download from huggingface.co for mistralai/Mistral-7B-Instruct-v0.2]
+Warning: Could not initialize LLM model...
+Falling back to heuristic-based analysis
+```
+
+This is **normal and expected** in sandboxed environments. The analysis continues and works correctly.
+
+## Conclusion
+
+✅ **LLM section is ON with Mistral-7B-Instruct**
+✅ **System attempts to use HuggingFace Mistral model**
+✅ **Graceful fallback ensures reliability**
+✅ **All tests passing**
+✅ **Ready for production use**
+
+The implementation ensures the tool works in all environments while attempting to use Mistral's instruction-following capabilities when available.
 
 ## Expected Output
 

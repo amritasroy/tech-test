@@ -143,7 +143,7 @@ Instead of requiring a full LLM model (which would need API keys or heavy model 
 - **Fast & Lightweight**: No model loading or API calls
 - **No External Dependencies**: Beyond transformers library structure
 
-The system is designed to optionally support full LLM models (like CodeBERT from HuggingFace) if needed, but defaults to heuristic analysis for speed and simplicity.
+The system is designed to optionally support full LLM models (like Mistral-7B-Instruct from HuggingFace) if needed, but defaults to heuristic analysis for speed and simplicity.
 
 ## Testing
 
@@ -200,7 +200,7 @@ Jane Smith
 
 ## Future Enhancements
 
-- Optional full LLM model support (CodeBERT, GraphCodeBERT)
+- Enhanced LLM model support (Mistral-7B-Instruct currently enabled, can add GraphCodeBERT, GPT variants)
 - Machine learning-based pattern recognition
 - Custom keyword/pattern configuration
 - Historical trend analysis of meaningful contributions

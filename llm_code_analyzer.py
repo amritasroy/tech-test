@@ -20,7 +20,7 @@ class LLMCodeAnalyzer:
     commit message accuracy.
     """
     
-    def __init__(self, use_llm: bool = False, model_name: str = "microsoft/codebert-base"):
+    def __init__(self, use_llm: bool = False, model_name: str = "mistralai/Mistral-7B-Instruct-v0.2"):
         """
         Initialize the code analyzer.
         
@@ -28,7 +28,7 @@ class LLMCodeAnalyzer:
             use_llm: Whether to use actual LLM model (requires transformers)
                     Default False uses heuristic-based analysis (faster, lighter)
             model_name: HuggingFace model identifier for code analysis
-                       Default: microsoft/codebert-base (open-source, no API key needed)
+                       Default: mistralai/Mistral-7B-Instruct-v0.2 (open-source, no API key needed)
         """
         self.use_llm = use_llm
         self.model_name = model_name

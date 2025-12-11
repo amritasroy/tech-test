@@ -92,6 +92,8 @@ def display_table(results, time_period_text):
         'Quality', 
         'Difficulty', 
         'Value',
+        'Logical%',
+        'Msg Match%',
         'Work Style'
     ]
     
@@ -106,6 +108,8 @@ def display_table(results, time_period_text):
             f"{stats['quality_score']:.1f}",
             f"{stats['difficulty_score']:.1f}",
             f"{stats['value_score']:.1f}",
+            f"{stats.get('avg_logical_impact', 0.0) * 100:.0f}",
+            f"{stats.get('avg_message_match', 0.5) * 100:.0f}",
             stats['work_style']
         ])
     
@@ -132,6 +136,21 @@ def display_detailed(results, time_period_text):
         click.echo(f"     • Quality Score: {stats['quality_score']:.2f}/100")
         click.echo(f"     • Difficulty Score: {stats['difficulty_score']:.2f}/100")
         click.echo(f"     • Value Score: {stats['value_score']:.2f}/100")
+        click.echo()
+        click.echo(f"  🤖 LLM-Based Code Analysis:")
+        click.echo(f"     • Logical Impact: {stats.get('avg_logical_impact', 0.0):.2%} (functional code)")
+        click.echo(f"     • Meaningful Score: {stats.get('avg_meaningful_score', 0.0):.2%} (overall quality)")
+        click.echo(f"     • Comment Ratio: {stats.get('avg_comment_ratio', 0.0):.2%}")
+        click.echo(f"     • Print/Debug Ratio: {stats.get('avg_print_ratio', 0.0):.2%}")
+        click.echo(f"     • Commit Message Match: {stats.get('avg_message_match', 0.5):.2%}")
+        
+        # Display mismatch warnings if any
+        if stats.get('mismatch_warnings'):
+            click.echo()
+            click.echo(f"  ⚠️  Commit Message Mismatches:")
+            for warning in stats['mismatch_warnings'][:3]:  # Show up to 3 warnings
+                click.echo(f"     • {warning['commit']}: {warning['message']}")
+                click.echo(f"       {warning['warning']}")
         click.echo()
         click.echo(f"  💼 Work Style: {stats['work_style']}")
         click.echo()

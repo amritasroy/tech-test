@@ -145,6 +145,18 @@ python git_tracker.py /path/to/repo --sort-by difficulty
 - Try using `--months 0` to analyze all commits
 - Check if there are actually commits in the specified time period
 
+### "git diff-tree failed" error with shallow clones
+- This error occurs when analyzing shallow clones (repositories cloned with `--depth` option)
+- **Solution**: Clone the full repository without the `--depth` option
+  ```bash
+  # Instead of: git clone --depth 50 https://github.com/user/repo.git
+  # Use: git clone https://github.com/user/repo.git
+  ```
+- For large repositories, you can use a deeper clone:
+  ```bash
+  git clone --depth 1000 https://github.com/user/repo.git
+  ```
+
 ### Large repositories taking too long
 - The tool analyzes all commits in the time period
 - Use shorter time periods for large repos

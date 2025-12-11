@@ -95,10 +95,18 @@ class CommitAnalyzer:
         try:
             # Get commit diff stats
             if commit.parents:
-                diffs = commit.parents[0].diff(commit, create_patch=True)
+                try:
+                    diffs = commit.parents[0].diff(commit, create_patch=True)
+                except Exception:
+                    # If diff fails (e.g., shallow clone, missing parent), skip this commit
+                    return stats
             else:
                 # First commit has no parent
-                diffs = commit.diff(None, create_patch=True)
+                try:
+                    diffs = commit.diff(None, create_patch=True)
+                except Exception:
+                    # If diff fails, skip this commit
+                    return stats
             
             stats['files_modified'] = len(diffs)
             
@@ -153,16 +161,17 @@ class CommitAnalyzer:
                     )
                     stats['llm_analysis']['commit_message_match'] = message_verification['match_score']
                     stats['llm_analysis']['mismatch_warning'] = message_verification['mismatch_warning']
-                except Exception as e:
-                    # If LLM analysis fails, continue with default values
+                except Exception:
+                    # If LLM analysis fails for any reason, continue with default values
+                    # This ensures the tool remains functional even if analysis fails
                     pass
         
-        except (ValueError, TypeError, AttributeError, Exception) as e:
-            # Handle specific exceptions that might occur during diff analysis
+        except (ValueError, TypeError, AttributeError):
+            # Handle git-specific exceptions that might occur during diff analysis
             # ValueError: Invalid diff or git object
-            # TypeError: Unexpected type in git operations
+            # TypeError: Unexpected type in git operations  
             # AttributeError: Missing expected attributes in git objects
-            # Exception: Catch any other git-related errors (e.g., missing commits)
+            # Continue with empty stats to allow analysis of other commits
             pass
         
         return stats

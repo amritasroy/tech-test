@@ -11,7 +11,7 @@ Full LLM analysis can be enabled by setting use_llm=True in initialization.
 """
 
 import re
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 
 
 class LLMCodeAnalyzer:
@@ -134,7 +134,7 @@ class LLMCodeAnalyzer:
             'meaningful_score': round(meaningful_score, 3)
         }
     
-    def verify_commit_message(self, commit_message: str, diff_text: str) -> Dict[str, any]:
+    def verify_commit_message(self, commit_message: str, diff_text: str) -> Dict[str, Any]:
         """
         Verify if the commit message matches the actual code changes.
         
@@ -303,7 +303,7 @@ class LLMCodeAnalyzer:
         
         return found_keywords if found_keywords else ['unknown']
     
-    def _analyze_change_type(self, diff_text: str) -> Dict[str, any]:
+    def _analyze_change_type(self, diff_text: str) -> Dict[str, Any]:
         """
         Analyze what type of changes were actually made.
         """
@@ -357,7 +357,7 @@ class LLMCodeAnalyzer:
         }
     
     def _calculate_match_score(self, message_keywords: List[str], 
-                               change_analysis: Dict[str, any]) -> float:
+                               change_analysis: Dict[str, Any]) -> float:
         """
         Calculate how well the commit message matches actual changes.
         """

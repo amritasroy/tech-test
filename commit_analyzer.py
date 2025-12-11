@@ -52,9 +52,10 @@ class CommitAnalyzer:
             for commit in self.repo.iter_commits():
                 commits.append(commit)
         else:
-            # Get commits from the last N months
+            # Get commits from the last N months (using UTC for consistency)
             cutoff_date = datetime.now() - relativedelta(months=months)
             for commit in self.repo.iter_commits():
+                # Git commits use UTC timestamps
                 commit_date = datetime.fromtimestamp(commit.committed_date)
                 if commit_date >= cutoff_date:
                     commits.append(commit)
@@ -99,8 +100,9 @@ class CommitAnalyzer:
                                 stats['lines_added'] += 1
                             elif line.startswith('-') and not line.startswith('---'):
                                 stats['lines_deleted'] += 1
-                    except (UnicodeDecodeError, AttributeError) as e:
-                        # Skip diffs that can't be decoded
+                    except (UnicodeDecodeError, AttributeError):
+                        # Skip diffs that can't be decoded properly
+                        # This can happen with binary files or unusual encodings
                         pass
                 
                 # Calculate complexity based on file types and change patterns
@@ -117,8 +119,11 @@ class CommitAnalyzer:
             if 1 <= stats['files_modified'] <= 3:
                 stats['complexity_score'] += 1
         
-        except (ValueError, TypeError, AttributeError) as e:
+        except (ValueError, TypeError, AttributeError):
             # Handle specific exceptions that might occur during diff analysis
+            # ValueError: Invalid diff or git object
+            # TypeError: Unexpected type in git operations
+            # AttributeError: Missing expected attributes in git objects
             pass
         
         return stats

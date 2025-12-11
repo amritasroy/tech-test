@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e  # Exit immediately if any command fails
+
 # Setup script for Git Commit Tracker
 
 echo "🔧 Setting up Git Commit Tracker..."
@@ -16,20 +18,14 @@ echo "✓ Found Python $PYTHON_VERSION"
 # Install dependencies
 echo ""
 echo "📦 Installing dependencies..."
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 
-if [ $? -eq 0 ]; then
-    echo ""
-    echo "✅ Setup complete!"
-    echo ""
-    echo "🚀 Quick Start:"
-    echo "   python git_tracker.py                    # Analyze current directory"
-    echo "   python git_tracker.py /path/to/repo      # Analyze specific repo"
-    echo "   python git_tracker.py --help             # See all options"
-    echo ""
-    echo "📖 See README.md and QUICKSTART.md for more information"
-else
-    echo ""
-    echo "❌ Installation failed. Please check the error messages above."
-    exit 1
-fi
+echo ""
+echo "✅ Setup complete!"
+echo ""
+echo "🚀 Quick Start:"
+echo "   python git_tracker.py                    # Analyze current directory"
+echo "   python git_tracker.py /path/to/repo      # Analyze specific repo"
+echo "   python git_tracker.py --help             # See all options"
+echo ""
+echo "📖 See README.md and QUICKSTART.md for more information"

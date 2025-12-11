@@ -73,6 +73,9 @@ def analyze(repo_path, format, sort_by, months):
     except ValueError as e:
         click.echo(f"❌ Error: {str(e)}", err=True)
         raise click.Abort()
+    except (OSError, IOError) as e:
+        click.echo(f"❌ File system error: {str(e)}", err=True)
+        raise click.Abort()
     except Exception as e:
         click.echo(f"❌ Unexpected error: {str(e)}", err=True)
         raise click.Abort()

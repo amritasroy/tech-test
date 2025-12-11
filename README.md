@@ -44,6 +44,16 @@ A Python-based CLI tool that analyzes git repository commits and measures contri
 
 ## Installation
 
+### Quick Setup (Recommended)
+
+```bash
+git clone https://github.com/amritasroy/tech-test.git
+cd tech-test
+./setup.sh
+```
+
+### Manual Setup
+
 1. Clone this repository:
 ```bash
 git clone https://github.com/amritasroy/tech-test.git

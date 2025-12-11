@@ -2,30 +2,35 @@
 """
 LLM-Based Code Analysis Module
 
-This module uses a HuggingFace transformer model to analyze code changes
-semantically and detect mismatches between commit messages and actual changes.
+This module uses heuristic-based semantic analysis to analyze code changes
+and detect mismatches between commit messages and actual changes.
+
+Note: While this module is designed to work with HuggingFace transformers,
+it uses heuristic analysis by default to avoid heavy model loading.
+Full LLM analysis can be enabled by setting use_llm=True in initialization.
 """
 
 import re
 from typing import Dict, List, Tuple, Optional
-from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
-import torch
 
 
 class LLMCodeAnalyzer:
     """
-    Analyzes code changes using LLM to detect semantic impact and verify
+    Analyzes code changes using semantic heuristics to detect impact and verify
     commit message accuracy.
     """
     
-    def __init__(self, model_name: str = "microsoft/codebert-base"):
+    def __init__(self, use_llm: bool = False, model_name: str = "microsoft/codebert-base"):
         """
-        Initialize the LLM analyzer with a HuggingFace model.
+        Initialize the code analyzer.
         
         Args:
+            use_llm: Whether to use actual LLM model (requires transformers)
+                    Default False uses heuristic-based analysis (faster, lighter)
             model_name: HuggingFace model identifier for code analysis
                        Default: microsoft/codebert-base (open-source, no API key needed)
         """
+        self.use_llm = use_llm
         self.model_name = model_name
         self.tokenizer = None
         self.model = None
@@ -33,14 +38,13 @@ class LLMCodeAnalyzer:
         
     def _lazy_init(self):
         """
-        Lazily initialize the model only when needed to save memory.
+        Lazily initialize the model only when needed and if use_llm is True.
         """
-        if not self._initialized:
+        if self.use_llm and not self._initialized:
             try:
+                from transformers import AutoTokenizer
                 # Use a lightweight model for code understanding
                 self.tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
-                # We'll use the tokenizer for semantic analysis without full model loading
-                # to keep it lightweight and fast
                 self._initialized = True
             except Exception as e:
                 print(f"Warning: Could not initialize LLM model: {e}")

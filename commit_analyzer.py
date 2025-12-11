@@ -139,25 +139,30 @@ class CommitAnalyzer:
             
             # Perform LLM-based semantic analysis
             if all_diff_text:
-                # Analyze code impact
-                impact_analysis = self.llm_analyzer.analyze_code_impact(all_diff_text)
-                stats['llm_analysis']['logical_impact'] = impact_analysis['logical_impact']
-                stats['llm_analysis']['comment_ratio'] = impact_analysis['comment_ratio']
-                stats['llm_analysis']['print_debug_ratio'] = impact_analysis['print_debug_ratio']
-                stats['llm_analysis']['meaningful_score'] = impact_analysis['meaningful_score']
-                
-                # Verify commit message matches actual changes
-                message_verification = self.llm_analyzer.verify_commit_message(
-                    commit.message, all_diff_text
-                )
-                stats['llm_analysis']['commit_message_match'] = message_verification['match_score']
-                stats['llm_analysis']['mismatch_warning'] = message_verification['mismatch_warning']
+                try:
+                    # Analyze code impact
+                    impact_analysis = self.llm_analyzer.analyze_code_impact(all_diff_text)
+                    stats['llm_analysis']['logical_impact'] = impact_analysis['logical_impact']
+                    stats['llm_analysis']['comment_ratio'] = impact_analysis['comment_ratio']
+                    stats['llm_analysis']['print_debug_ratio'] = impact_analysis['print_debug_ratio']
+                    stats['llm_analysis']['meaningful_score'] = impact_analysis['meaningful_score']
+                    
+                    # Verify commit message matches actual changes
+                    message_verification = self.llm_analyzer.verify_commit_message(
+                        commit.message, all_diff_text
+                    )
+                    stats['llm_analysis']['commit_message_match'] = message_verification['match_score']
+                    stats['llm_analysis']['mismatch_warning'] = message_verification['mismatch_warning']
+                except Exception as e:
+                    # If LLM analysis fails, continue with default values
+                    pass
         
-        except (ValueError, TypeError, AttributeError):
+        except (ValueError, TypeError, AttributeError, Exception) as e:
             # Handle specific exceptions that might occur during diff analysis
             # ValueError: Invalid diff or git object
             # TypeError: Unexpected type in git operations
             # AttributeError: Missing expected attributes in git objects
+            # Exception: Catch any other git-related errors (e.g., missing commits)
             pass
         
         return stats

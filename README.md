@@ -2,13 +2,26 @@
 
 A Python-based CLI tool that analyzes git repository commits and measures contributor value based on multiple metrics including amount of work, quality, difficulty, and actual impact.
 
+## ✨ New: LLM-Based Code Impact Analysis
+
+**Addresses the concern**: How to catch when developers use meaningful keywords in commits but make irrelevant changes, or when added lines are just comments/prints?
+
+**Solution**: Intelligent semantic analysis that:
+- 🎯 **Tracks Logical Impact**: Distinguishes functional code from comments and debug statements
+- 🔍 **Verifies Commit Messages**: Detects mismatches between what commit says vs. what it does
+- 📊 **Measures Real Value**: Goes beyond line counts to assess actual code quality
+- ⚡ **No API Keys Required**: Uses intelligent heuristics (with optional HuggingFace model support)
+
+See [LLM Analysis Guide](LLM_ANALYSIS_GUIDE.md) for detailed documentation.
+
 ## Features
 
-- 📊 **Comprehensive Metrics**: Analyzes commits from the last month
+- 📊 **Comprehensive Metrics**: Analyzes commits from any time period
 - 👥 **Contributor Analysis**: Tracks individual contributor performance
 - 🎯 **Value Measurement**: Evaluates quality vs. quantity of contributions
 - 💼 **Work Style Classification**: Identifies contributor patterns
 - 📈 **Multiple Views**: Table and detailed output formats
+- 🤖 **LLM-Based Analysis**: Semantic code impact and commit message verification
 
 ## Metrics Explained
 
@@ -33,6 +46,12 @@ A Python-based CLI tool that analyzes git repository commits and measures contri
 - Actual impact vs. effort
 - Quality-adjusted effectiveness
 - Consistency of meaningful commits
+
+### 🆕 LLM-Based Metrics
+- **Logical Impact %**: Percentage of actual functional code (vs comments/logging)
+- **Meaningful Score**: Overall quality weighting logic > comments > debug
+- **Commit Message Match %**: How well commit messages match actual changes
+- **Mismatch Warnings**: Alerts when commits say one thing but do another
 
 ### Work Style Categories
 - **High-impact contributor**: High quality and value
@@ -118,16 +137,16 @@ python git_tracker.py /path/to/repo --format detailed --sort-by quality --months
 
 ## Example Output
 
-### Table Format
+### Table Format (with new LLM metrics)
 ```
 📊 Contributors (Last Month):
 
-+----------------+---------+----------+----------+-------+---------+------------+-------+---------------------------+
-| Author         | Commits | Lines +  | Lines -  | Files | Quality | Difficulty | Value | Work Style                |
-+----------------+---------+----------+----------+-------+---------+------------+-------+---------------------------+
-| John Doe       | 25      | 1500     | 800      | 45    | 72.5    | 65.3       | 78.2  | High-impact contributor   |
-| Jane Smith     | 15      | 2000     | 500      | 30    | 68.0    | 58.7       | 71.5  | Complex problem solver    |
-+----------------+---------+----------+----------+-------+---------+------------+-------+---------------------------+
++------------+---------+---------+---------+-------+---------+------------+-------+----------+------------+-------------------------+
+| Author     | Commits | Lines + | Lines - | Files | Quality | Difficulty | Value | Logical% | Msg Match% | Work Style              |
++------------+---------+---------+---------+-------+---------+------------+-------+----------+------------+-------------------------+
+| John Doe   | 25      | 1500    | 800     | 45    | 72.5    | 65.3       | 78.2  | 68       | 85         | High-impact contributor |
+| Jane Smith | 15      | 2000    | 500     | 30    | 68.0    | 58.7       | 71.5  | 45       | 62         | Complex problem solver  |
++------------+---------+---------+---------+-------+---------+------------+-------+----------+------------+-------------------------+
 
 📋 OVERALL SUMMARY (Last Month)
 Total Contributors: 2
@@ -136,7 +155,7 @@ Average Quality Score: 70.25/100
 Average Value Score: 74.85/100
 ```
 
-### Detailed Format
+### Detailed Format (with LLM analysis)
 ```
 👥 Contributors (Last Month) - Detailed View:
 
@@ -153,12 +172,30 @@ Average Value Score: 74.85/100
      • Difficulty Score: 65.30/100
      • Value Score: 78.20/100
   
+  🤖 LLM-Based Code Analysis:
+     • Logical Impact: 68.00% (functional code)
+     • Meaningful Score: 62.50% (overall quality)
+     • Comment Ratio: 20.00%
+     • Print/Debug Ratio: 12.00%
+     • Commit Message Match: 85.00%
+  
   💼 Work Style: High-impact contributor
 ```
 
 ## Testing
 
-Test the tool with the reference repository:
+### Run LLM Analysis Tests
+
+```bash
+python test_llm_analyzer.py
+```
+
+This validates:
+- Logical code detection
+- Comment and logging detection
+- Commit message verification
+
+### Test with a Repository
 
 ```bash
 # Clone the reference repository

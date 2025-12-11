@@ -97,14 +97,16 @@ class CommitAnalyzer:
             if commit.parents:
                 try:
                     diffs = commit.parents[0].diff(commit, create_patch=True)
-                except Exception:
-                    # If diff fails (e.g., shallow clone, missing parent), skip this commit
+                except Exception as e:
+                    # If diff fails (e.g., shallow clone missing parent commits, bad git objects)
+                    # Skip this commit and continue with empty stats
+                    # Common causes: GitCommandError, BadName, missing objects in shallow clones
                     return stats
             else:
                 # First commit has no parent
                 try:
                     diffs = commit.diff(None, create_patch=True)
-                except Exception:
+                except Exception as e:
                     # If diff fails, skip this commit
                     return stats
             

@@ -44,7 +44,7 @@ class LLMCodeAnalyzer:
             try:
                 from transformers import AutoTokenizer
                 # Use a lightweight model for code understanding
-                self.tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
                 self._initialized = True
             except Exception as e:
                 print(f"Warning: Could not initialize LLM model: {e}")

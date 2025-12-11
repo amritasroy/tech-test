@@ -69,6 +69,9 @@ class LLMCodeAnalyzer:
             - print_debug_ratio: Ratio of print/logging statements
             - meaningful_score: Overall meaningful code score
         """
+        # Initialize LLM model if needed
+        self._lazy_init()
+        
         if not diff_text:
             return {
                 'logical_impact': 0.0,

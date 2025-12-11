@@ -40,7 +40,8 @@ class CommitAnalyzer:
             raise ValueError(f"Repository at {repo_path} is bare")
         
         # Initialize LLM analyzer for semantic code analysis
-        self.llm_analyzer = LLMCodeAnalyzer()
+        # use_llm=True enables full transformer model support
+        self.llm_analyzer = LLMCodeAnalyzer(use_llm=True)
     
     def get_commits_last_month(self, months: int = 1) -> List:
         """

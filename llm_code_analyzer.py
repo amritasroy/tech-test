@@ -39,6 +39,10 @@ class LLMCodeAnalyzer:
     def _lazy_init(self):
         """
         Lazily initialize the model only when needed and if use_llm is True.
+        
+        Note: This method is reserved for future use when full LLM model support
+        is enabled via use_llm=True. Currently, the tool uses heuristic-based
+        analysis by default for speed and simplicity.
         """
         if self.use_llm and not self._initialized:
             try:

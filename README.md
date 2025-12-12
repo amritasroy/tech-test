@@ -184,6 +184,12 @@ Average Value Score: 74.85/100
 
 ## Testing
 
+### Quick Test Guide
+
+For a complete guide on testing with two public repositories using both LLM and fallback modes, see:
+- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Comprehensive testing instructions
+- **[QUICK_TEST_REFERENCE.md](QUICK_TEST_REFERENCE.md)** - Quick reference for rapid testing
+
 ### Run LLM Analysis Tests
 
 ```bash
@@ -194,6 +200,18 @@ This validates:
 - Logical code detection
 - Comment and logging detection
 - Commit message verification
+
+### Test with Public Repositories
+
+```bash
+# Quick test with Flask
+git clone https://github.com/pallets/flask.git ~/test-repos/flask
+python git_tracker.py ~/test-repos/flask --months 1
+
+# Quick test with NumPy
+git clone https://github.com/numpy/numpy.git ~/test-repos/numpy
+python git_tracker.py ~/test-repos/numpy --months 1
+```
 
 ### Test with a Repository
 

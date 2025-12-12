@@ -17,6 +17,7 @@ from typing import Dict, List, Tuple
 
 from git import Repo
 from dateutil.relativedelta import relativedelta
+from llm_code_analyzer import LLMCodeAnalyzer
 
 
 class CommitAnalyzer:
@@ -37,6 +38,11 @@ class CommitAnalyzer:
         
         if self.repo.bare:
             raise ValueError(f"Repository at {repo_path} is bare")
+        
+        # Initialize LLM analyzer for semantic code analysis
+        # use_llm=True enables full transformer model support
+        # Using mistral-7b-instruct for enhanced code understanding
+        self.llm_analyzer = LLMCodeAnalyzer(use_llm=True, model_name="mistralai/Mistral-7B-Instruct-v0.2")
     
     def get_commits_last_month(self, months: int = 1) -> List:
         """
@@ -70,30 +76,54 @@ class CommitAnalyzer:
         Analyze a single commit for various metrics.
         
         Returns:
-            Dictionary with lines_added, lines_deleted, files_modified, complexity_score
+            Dictionary with lines_added, lines_deleted, files_modified, complexity_score,
+            and LLM-based semantic analysis
         """
         stats = {
             'lines_added': 0,
             'lines_deleted': 0,
             'files_modified': 0,
-            'complexity_score': 0
+            'complexity_score': 0,
+            'llm_analysis': {
+                'logical_impact': 0.0,
+                'comment_ratio': 0.0,
+                'print_debug_ratio': 0.0,
+                'meaningful_score': 0.0,
+                'commit_message_match': 0.5,
+                'mismatch_warning': None
+            }
         }
         
         try:
             # Get commit diff stats
             if commit.parents:
-                diffs = commit.parents[0].diff(commit, create_patch=True)
+                try:
+                    diffs = commit.parents[0].diff(commit, create_patch=True)
+                except Exception:
+                    # If diff fails (e.g., shallow clone missing parent commits, bad git objects)
+                    # Skip this commit and continue with empty stats
+                    # Common causes: GitCommandError, BadName, missing objects in shallow clones
+                    return stats
             else:
                 # First commit has no parent
-                diffs = commit.diff(None, create_patch=True)
+                try:
+                    diffs = commit.diff(None, create_patch=True)
+                except Exception:
+                    # If diff fails, skip this commit
+                    return stats
             
             stats['files_modified'] = len(diffs)
+            
+            # Collect all diff text for LLM analysis
+            all_diff_text = ""
             
             for diff in diffs:
                 # Count lines added and deleted
                 if diff.diff:
                     try:
                         diff_text = diff.diff.decode('utf-8', errors='ignore')
+                        all_diff_text += diff_text + "\n"
+                        
                         lines = diff_text.split('\n')
                         for line in lines:
                             if line.startswith('+') and not line.startswith('+++'):
@@ -118,12 +148,34 @@ class CommitAnalyzer:
             # Check this after all diffs are processed
             if 1 <= stats['files_modified'] <= 3:
                 stats['complexity_score'] += 1
+            
+            # Perform LLM-based semantic analysis
+            if all_diff_text:
+                try:
+                    # Analyze code impact
+                    impact_analysis = self.llm_analyzer.analyze_code_impact(all_diff_text)
+                    stats['llm_analysis']['logical_impact'] = impact_analysis['logical_impact']
+                    stats['llm_analysis']['comment_ratio'] = impact_analysis['comment_ratio']
+                    stats['llm_analysis']['print_debug_ratio'] = impact_analysis['print_debug_ratio']
+                    stats['llm_analysis']['meaningful_score'] = impact_analysis['meaningful_score']
+                    
+                    # Verify commit message matches actual changes
+                    message_verification = self.llm_analyzer.verify_commit_message(
+                        commit.message, all_diff_text
+                    )
+                    stats['llm_analysis']['commit_message_match'] = message_verification['match_score']
+                    stats['llm_analysis']['mismatch_warning'] = message_verification['mismatch_warning']
+                except Exception:
+                    # If LLM analysis fails for any reason, continue with default values
+                    # This ensures the tool remains functional even if analysis fails
+                    pass
         
         except (ValueError, TypeError, AttributeError):
-            # Handle specific exceptions that might occur during diff analysis
+            # Handle git-specific exceptions that might occur during diff analysis
             # ValueError: Invalid diff or git object
-            # TypeError: Unexpected type in git operations
+            # TypeError: Unexpected type in git operations  
             # AttributeError: Missing expected attributes in git objects
+            # Continue with empty stats to allow analysis of other commits
             pass
         
         return stats
@@ -306,7 +358,13 @@ class CommitAnalyzer:
             'lines_deleted': 0,
             'files_modified': 0,
             'complexity_score': 0,
-            'message_qualities': []
+            'message_qualities': [],
+            'llm_logical_impacts': [],
+            'llm_meaningful_scores': [],
+            'llm_comment_ratios': [],
+            'llm_print_ratios': [],
+            'llm_message_matches': [],
+            'mismatch_warnings': []
         })
         
         for commit in commits:
@@ -323,6 +381,22 @@ class CommitAnalyzer:
             # Analyze message quality
             msg_quality = self.analyze_commit_message_quality(commit.message)
             author_stats[author]['message_qualities'].append(msg_quality)
+            
+            # Aggregate LLM analysis results
+            llm_data = stats.get('llm_analysis', {})
+            author_stats[author]['llm_logical_impacts'].append(llm_data.get('logical_impact', 0.0))
+            author_stats[author]['llm_meaningful_scores'].append(llm_data.get('meaningful_score', 0.0))
+            author_stats[author]['llm_comment_ratios'].append(llm_data.get('comment_ratio', 0.0))
+            author_stats[author]['llm_print_ratios'].append(llm_data.get('print_debug_ratio', 0.0))
+            author_stats[author]['llm_message_matches'].append(llm_data.get('commit_message_match', 0.5))
+            
+            # Collect mismatch warnings
+            if llm_data.get('mismatch_warning'):
+                author_stats[author]['mismatch_warnings'].append({
+                    'commit': commit.hexsha[:7],
+                    'message': commit.message.split('\n')[0][:50],
+                    'warning': llm_data.get('mismatch_warning')
+                })
         
         # Calculate derived metrics for each author
         results = {}
@@ -333,6 +407,32 @@ class CommitAnalyzer:
             else:
                 stats['avg_message_quality'] = 0.5
             
+            # Calculate LLM-based metrics
+            if stats['llm_logical_impacts']:
+                stats['avg_logical_impact'] = sum(stats['llm_logical_impacts']) / len(stats['llm_logical_impacts'])
+            else:
+                stats['avg_logical_impact'] = 0.0
+            
+            if stats['llm_meaningful_scores']:
+                stats['avg_meaningful_score'] = sum(stats['llm_meaningful_scores']) / len(stats['llm_meaningful_scores'])
+            else:
+                stats['avg_meaningful_score'] = 0.0
+            
+            if stats['llm_comment_ratios']:
+                stats['avg_comment_ratio'] = sum(stats['llm_comment_ratios']) / len(stats['llm_comment_ratios'])
+            else:
+                stats['avg_comment_ratio'] = 0.0
+            
+            if stats['llm_print_ratios']:
+                stats['avg_print_ratio'] = sum(stats['llm_print_ratios']) / len(stats['llm_print_ratios'])
+            else:
+                stats['avg_print_ratio'] = 0.0
+            
+            if stats['llm_message_matches']:
+                stats['avg_message_match'] = sum(stats['llm_message_matches']) / len(stats['llm_message_matches'])
+            else:
+                stats['avg_message_match'] = 0.5
+            
             # Calculate scores
             stats['quality_score'] = self.calculate_quality_score(stats)
             stats['difficulty_score'] = self.calculate_difficulty_score(stats)
@@ -341,6 +441,11 @@ class CommitAnalyzer:
             
             # Remove temporary data
             del stats['message_qualities']
+            del stats['llm_logical_impacts']
+            del stats['llm_meaningful_scores']
+            del stats['llm_comment_ratios']
+            del stats['llm_print_ratios']
+            del stats['llm_message_matches']
             
             results[author] = stats
         

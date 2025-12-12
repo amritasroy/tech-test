@@ -608,7 +608,6 @@ Both modes provide accurate, reliable code analysis for measuring contributor va
 - **README.md**: General overview and features
 - **QUICKSTART.md**: Quick start guide
 - **LLM_ANALYSIS_GUIDE.md**: Deep dive into LLM features
-- **LLM_MODE_STATUS.md**: LLM mode configuration details
 - **TESTING_RESULTS.md**: Real-world testing results
 - **EXAMPLE_OUTPUT.md**: Sample outputs and interpretation
 

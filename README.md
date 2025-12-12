@@ -187,7 +187,8 @@ Average Value Score: 74.85/100
 ### Quick Test Guide
 
 For a complete guide on testing with two public repositories using both LLM and fallback modes, see:
-- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Comprehensive testing instructions
+- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Comprehensive testing instructions (Linux/macOS)
+- **[TESTING_GUIDE_WINDOWS.md](TESTING_GUIDE_WINDOWS.md)** - Windows-specific testing guide
 - **[QUICK_TEST_REFERENCE.md](QUICK_TEST_REFERENCE.md)** - Quick reference for rapid testing
 
 ### Run LLM Analysis Tests

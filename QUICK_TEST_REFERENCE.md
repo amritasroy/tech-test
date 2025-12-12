@@ -4,6 +4,7 @@
 
 ## TL;DR - Complete Test in 5 Minutes
 
+### Linux/macOS
 ```bash
 # 1. Setup
 cd ~
@@ -30,7 +31,63 @@ python test_llm_analyzer.py
 python test_llm_mode.py
 ```
 
+### Windows (Command Prompt)
+```batch
+REM 1. Setup
+git clone https://github.com/amritasroy/tech-test.git
+cd tech-test
+pip install gitpython click tabulate python-dateutil
+
+REM 2. Clone test repos
+mkdir %USERPROFILE%\test-repos
+cd %USERPROFILE%\test-repos
+git clone https://github.com/pallets/flask.git
+git clone https://github.com/numpy/numpy.git
+
+REM 3. Test with both modes (LLM mode with auto-fallback is default)
+cd %USERPROFILE%\tech-test
+
+REM Repository 1: Flask
+python git_tracker.py %USERPROFILE%\test-repos\flask --months 1
+
+REM Repository 2: NumPy
+python git_tracker.py %USERPROFILE%\test-repos\numpy --months 1
+
+REM 4. Run unit tests
+python test_llm_analyzer.py
+python test_llm_mode.py
+```
+
+### Windows (PowerShell)
+```powershell
+# 1. Setup
+git clone https://github.com/amritasroy/tech-test.git
+Set-Location tech-test
+pip install gitpython click tabulate python-dateutil
+
+# 2. Clone test repos
+New-Item -ItemType Directory -Path "$env:USERPROFILE\test-repos" -Force
+Set-Location "$env:USERPROFILE\test-repos"
+git clone https://github.com/pallets/flask.git
+git clone https://github.com/numpy/numpy.git
+
+# 3. Test with both modes (LLM mode with auto-fallback is default)
+Set-Location "$env:USERPROFILE\tech-test"
+
+# Repository 1: Flask
+python git_tracker.py "$env:USERPROFILE\test-repos\flask" --months 1
+
+# Repository 2: NumPy
+python git_tracker.py "$env:USERPROFILE\test-repos\numpy" --months 1
+
+# 4. Run unit tests
+python test_llm_analyzer.py
+python test_llm_mode.py
+```
+
 **That's it!** The tool automatically uses LLM mode with fallback to heuristics. ✅
+
+**📖 For detailed Windows guide, see [TESTING_GUIDE_WINDOWS.md](TESTING_GUIDE_WINDOWS.md)**
 
 ---
 
@@ -62,7 +119,7 @@ self.llm_analyzer = LLMCodeAnalyzer(use_llm=False)
 
 ## Test Commands Cheat Sheet
 
-### Basic Testing
+### Basic Testing (Linux/macOS)
 ```bash
 # Test Flask (last month)
 python git_tracker.py ~/test-repos/flask --months 1
@@ -77,7 +134,22 @@ python git_tracker.py ~/test-repos/flask --months 0
 python git_tracker.py ~/test-repos/numpy --months 0
 ```
 
-### Detailed Views
+### Basic Testing (Windows)
+```batch
+REM Test Flask (last month)
+python git_tracker.py %USERPROFILE%\test-repos\flask --months 1
+
+REM Test NumPy (last month)
+python git_tracker.py %USERPROFILE%\test-repos\numpy --months 1
+
+REM Test Flask (all commits)
+python git_tracker.py %USERPROFILE%\test-repos\flask --months 0
+
+REM Test NumPy (all commits)
+python git_tracker.py %USERPROFILE%\test-repos\numpy --months 0
+```
+
+### Detailed Views (Linux/macOS)
 ```bash
 # Detailed analysis
 python git_tracker.py ~/test-repos/flask --format detailed
@@ -89,7 +161,19 @@ python git_tracker.py ~/test-repos/numpy --sort-by quality
 python git_tracker.py ~/test-repos/flask --sort-by value
 ```
 
-### Check Configuration
+### Detailed Views (Windows)
+```batch
+REM Detailed analysis
+python git_tracker.py %USERPROFILE%\test-repos\flask --format detailed
+
+REM Sort by quality
+python git_tracker.py %USERPROFILE%\test-repos\numpy --sort-by quality
+
+REM Sort by value
+python git_tracker.py %USERPROFILE%\test-repos\flask --sort-by value
+```
+
+### Check Configuration (Linux/macOS)
 ```bash
 # Verify LLM mode status (run from tech-test directory)
 cd ~/tech-test
@@ -100,7 +184,18 @@ python -c "from commit_analyzer import CommitAnalyzer; a = CommitAnalyzer('.'); 
 # Model: mistralai/Mistral-7B-Instruct-v0.2
 ```
 
-### Run Tests
+### Check Configuration (Windows)
+```batch
+REM Verify LLM mode status (run from tech-test directory)
+cd %USERPROFILE%\tech-test
+python -c "from commit_analyzer import CommitAnalyzer; a = CommitAnalyzer('.'); print(f'LLM: {a.llm_analyzer.use_llm}'); print(f'Model: {a.llm_analyzer.model_name}')"
+
+REM Expected output:
+REM LLM: True
+REM Model: mistralai/Mistral-7B-Instruct-v0.2
+```
+
+### Run Tests (All Platforms)
 ```bash
 # Analyzer tests
 python test_llm_analyzer.py

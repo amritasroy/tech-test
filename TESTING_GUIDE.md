@@ -104,6 +104,7 @@ Or create a temporary test script:
 
 ```python
 # test_fallback_mode.py
+import os
 from commit_analyzer import CommitAnalyzer
 from llm_code_analyzer import LLMCodeAnalyzer
 
@@ -130,8 +131,9 @@ CommitAnalyzer.__init__ = new_init
 print("Testing with FALLBACK MODE (Heuristic-based)")
 print("=" * 80)
 
-# Test Flask
-analyzer = CommitAnalyzer('~/test-repos/flask')
+# Test Flask (expand ~ to home directory)
+flask_path = os.path.expanduser('~/test-repos/flask')
+analyzer = CommitAnalyzer(flask_path)
 results = analyzer.analyze_repository(months=1)
 print(f"\nFlask Results: {len(results)} contributors found")
 for author, stats in list(results.items())[:3]:
@@ -176,12 +178,24 @@ python git_tracker.py ~/test-repos/numpy --months 0 --format detailed
 # Test the analyzer directly
 python test_llm_analyzer.py
 
-# Expected output:
-# ✓ All tests passed!
-# - Logical code detection
-# - Comment detection
-# - Print/debug detection
-# - Commit message verification
+# Expected output (showing passing tests):
+# ================================================================================
+# LLM Code Analyzer Tests
+# ================================================================================
+# 
+# Testing Logical Code Detection:
+# --------------------------------------------------------------------------------
+# Test 1 - Comments only:
+#   Logical Impact: 0.00%
+#   Comment Ratio: 100.00%
+#   Meaningful Score: 15.00%
+#   ✓ Passed
+# 
+# [Additional tests...]
+# 
+# ================================================================================
+# All tests passed! ✓
+# ================================================================================
 ```
 
 ### Expected Output (Fallback Mode)
@@ -311,10 +325,14 @@ Falling back to heuristic-based analysis
 
 ```python
 # compare_modes.py
+import os
 from commit_analyzer import CommitAnalyzer
 from llm_code_analyzer import LLMCodeAnalyzer
 
 def test_both_modes(repo_path):
+    # Expand ~ to home directory
+    repo_path = os.path.expanduser(repo_path)
+    
     print(f"\nTesting repository: {repo_path}")
     print("=" * 80)
     

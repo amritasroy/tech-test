@@ -91,7 +91,8 @@ python git_tracker.py ~/test-repos/flask --sort-by value
 
 ### Check Configuration
 ```bash
-# Verify LLM mode status
+# Verify LLM mode status (run from tech-test directory)
+cd ~/tech-test
 python -c "from commit_analyzer import CommitAnalyzer; a = CommitAnalyzer('.'); print(f'LLM: {a.llm_analyzer.use_llm}'); print(f'Model: {a.llm_analyzer.model_name}')"
 
 # Expected output:
